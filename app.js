@@ -22,6 +22,10 @@ const cloudinaryStorage = require("multer-storage-cloudinary");
 const User = require('./models/user');
 const errorController = require("./controllers/error");
 
+
+MONGO_DB_URI="mongodb+srv://admin:110120119@cluster0.fah8o.mongodb.net/myDatabase?retryWrites=true&w=majority&appName=Cluster0"
+PORT=3000
+
 const { MONGO_DB_URI, PORT } = process.env;
 
 const app = express();
