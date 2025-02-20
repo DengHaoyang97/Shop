@@ -22,11 +22,14 @@ const cloudinaryStorage = require("multer-storage-cloudinary");
 const User = require('./models/user');
 const errorController = require("./controllers/error");
 
+// ✅ 读取环境变量，提供默认值（防止 `undefined`）
+const MONGO_DB_URI = process.env.MONGO_DB_URI || "mongodb+srv://admin:110120119@cluster0.fah8o.mongodb.net/myDatabase?retryWrites=true&w=majority&appName=Cluster0";
+const PORT = process.env.PORT || 3000;
 
-MONGO_DB_URI="mongodb+srv://admin:110120119@cluster0.fah8o.mongodb.net/myDatabase?retryWrites=true&w=majority&appName=Cluster0"
-PORT=3000
-
-const { MONGO_DB_URI, PORT } = process.env;
+if (!MONGO_DB_URI) {
+  console.error("❌ MONGO_DB_URI is not defined! Check your environment variables.");
+  process.exit(1); // 直接终止程序，避免错误连接
+}
 
 const app = express();
 
@@ -100,7 +103,6 @@ app.use(shopRoutes);
 app.use(authRoutes);
 
 app.use('/500', errorController.get500);
-
 app.use(errorController.get404);
 
 app.use((error, req, res, next) => {
@@ -113,7 +115,12 @@ app.use((error, req, res, next) => {
     });
 })
 
+// ✅ `mongoose.connect()` 之前检查 MONGO_DB_URI
 mongoose.connect(MONGO_DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 .then(() => {
-    app.listen(PORT || 3000);
-}).catch(err => console.log(err));
+    console.log(`✅ Connected to MongoDB: ${MONGO_DB_URI}`);
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+}).catch(err => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+});
